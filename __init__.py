@@ -420,3 +420,106 @@ class MobileData:
                 vals_list.append(None)
 
         self.write_row(vals_list)
+
+    """
+    Methods for reading/writing to a file in one method call (opens file and does all work then
+    closes it all in one call).
+    """
+
+    @staticmethod
+    def read_rows_from_file(file_name: str) -> List[List[Union[float, str, datetime, None]]]:
+        """
+        Read all rows from the file with the given file name. Returns a list of rows as lists.
+        """
+
+        with MobileData(file_name, 'r') as in_file:
+            return in_file.read_all_rows()
+
+    @staticmethod
+    def read_rows_from_file_dict(file_name: str) \
+            -> List[Dict[str, Union[float, str, datetime, None]]]:
+        """
+        Read all rows from the file with the given file name. Returns a list of rows as dicts.
+        """
+
+        with MobileData(file_name, 'r') as in_file:
+            return in_file.read_all_rows_dict()
+
+    @staticmethod
+    def write_rows_to_file(
+            file_name: str,
+            fields: OrderedDict[str, str],
+            rows_to_write: List[List[Union[float, str, datetime, None]]],
+            mode: str = 'w'
+    ):
+        """
+        Write all rows in the given list to the file with the given name.
+
+        Parameters
+        ----------
+        file_name : str
+            Path to the file to write to
+        fields : OrderedDict[str, str]
+            Ordered dictionary mapping of field_name->field_type (as str) to use
+            See more info on `set_fields()`
+        rows_to_write : List[List[Union[float, str, datetime, None]]]
+            List of rows (as lists) to write to the given file
+            Should match the fields and order provided in `fields` parameter
+        mode : {'w', 'a'}, default 'w'
+            The mode to open the file in (defaults to write mode ('w'))
+            If opened in write mode, the headers will be written to the file at the start
+            If in append mode, headers will not be written as they are assumed to already be in file
+        """
+
+        if mode not in MobileData.write_modes:
+            msg = f"Provided mode '{mode}' is not allowed - must be one of {MobileData.write_modes}"
+            raise ValueError(msg)
+
+        with MobileData(file_name, mode) as out_file:
+            out_file.set_fields(fields)
+
+            if mode == 'w':
+                out_file.write_headers()
+
+            for row in rows_to_write:
+                out_file.write_row(row)
+
+    @staticmethod
+    def write_rows_to_file_dict(
+            file_name: str,
+            fields: OrderedDict[str, str],
+            rows_to_write: List[Dict[str, Union[float, str, datetime, None]]],
+            mode: str = 'w'
+    ):
+        """
+        Write all rows in the given list to the file with the given name. Rows must be provided as
+        dictionaries of field_name->value mapping
+
+        Parameters
+        ----------
+        file_name : str
+            Path to the file to write to
+        fields : OrderedDict[str, str]
+            Ordered dictionary mapping of field_name->field_type (as str) to use
+            See more info on `set_fields()`
+        rows_to_write : List[Dict[str, Union[float, str, datetime, None]]]
+            List of rows (as dicts) to write to the given file
+            Should be field_name->value mapping
+        mode : {'w', 'a'}, default 'w'
+            The mode to open the file in (defaults to write mode ('w'))
+            If opened in write mode, the headers will be written to the file at the start
+            If in append mode, headers will not be written as they are assumed to already be in file
+        """
+
+        if mode not in MobileData.write_modes:
+            msg = f"Provided mode '{mode}' is not allowed - must be one of {MobileData.write_modes}"
+            raise ValueError(msg)
+
+        with MobileData(file_name, mode) as out_file:
+            out_file.set_fields(fields)
+
+            if mode == 'w':
+                out_file.write_headers()
+
+            for row in rows_to_write:
+                out_file.write_row_dict(row)

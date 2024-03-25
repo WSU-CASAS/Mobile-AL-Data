@@ -23,6 +23,7 @@ default_sensors = OrderedDict({
     'speed': 'f',
     'horizontal_accuracy': 'f',
     'vertical_accuracy': 'f',
+    'heart_rate': 'f',
     'battery_state': 's'
 })
 
